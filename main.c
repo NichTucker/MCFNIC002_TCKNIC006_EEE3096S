@@ -1,5 +1,4 @@
 /* USER CODE BEGIN Header */
-//this is a test comment
 /**
   ******************************************************************************
   * @file           : main.c
@@ -25,8 +24,7 @@
 #include <stdint.h>
 #include "stm32f0xx.h"
 /* USER CODE END Includes */
-//#include <lcd_stm32f0.h>
-//#include "lcd_stm32f0.c"
+
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
@@ -47,22 +45,23 @@ TIM_HandleTypeDef htim16;
 /* USER CODE BEGIN PV */
 // TODO: Define input variables
 
-uint8_t led_patterns[9][8] = {
-    {1, 1, 1, 0, 1, 0, 0, 1},
-    {1, 1, 0, 1, 0, 0, 1, 0},
-    {1, 0, 1, 0, 0, 1, 0, 0},
-    {0, 1, 0, 0, 1, 0, 0, 0},
-    {1, 0, 0, 1, 0, 0, 0, 0},
-    {0, 0, 1, 0, 0, 0, 0, 0},
-    {0, 1, 0, 0, 0, 0, 0, 0},
-    {1, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0}
+uint8_t led_patterns[9] = {
+    0b11101001, // Pattern 1
+    0b11010010, // Pattern 2
+    0b10100100, // Pattern 3
+    0b01001000, // Pattern 4
+    0b10010000, // Pattern 5
+    0b00100000, // Pattern 6
+    0b01000000, // Pattern 7
+    0b10000000, // Pattern 8
+    0b00000000  // Pattern 9
 };
-uint8_t current_pattern = 0;
 
-uint32_t delay = 1000; // 1 second default delay
+uint8_t current_pattern = 0; // Index of the current pattern
+uint32_t delay = 1000;        // Default delay set to 1 second
 
 /* USER CODE END PV */
+
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
@@ -84,10 +83,6 @@ void TIM16_IRQHandler(void);
 int main(void)
 {
 
-
-	//init_LCD();
-	 //lcd_command(CLEAR);
-	 //lcd_putstring("EEE3095S Prac 1");
   /* USER CODE BEGIN 1 */
   /* USER CODE END 1 */
 
@@ -110,19 +105,14 @@ int main(void)
   MX_TIM16_Init();
   /* USER CODE BEGIN 2 */
 
+
   // TODO: Start timer TIM16
 
-  HAL_TIM_Base_Start_IT(&htim16);
+
 
   /* USER CODE END 2 */
-                        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, led_patterns[current_pattern][0]);
-  		                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, led_patterns[current_pattern][1]);
-  		                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, led_patterns[current_pattern][2]);
-  		                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, led_patterns[current_pattern][3]);
-  		                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, led_patterns[current_pattern][4]);
-  		                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, led_patterns[current_pattern][5]);
-  		                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, led_patterns[current_pattern][6]);
-  		                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, led_patterns[current_pattern][7]);
+
+
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -133,18 +123,12 @@ int main(void)
     /* USER CODE BEGIN 3 */
 
     // TODO: Check pushbuttons to change timer delay
-	  if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == GPIO_PIN_SET) {
-	  	              delay = 500; // 0.5 seconds
-	  	          } else if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1) == GPIO_PIN_SET) {
-	  	              delay = 2000; // 2 seconds
-	  	          } else if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_2) == GPIO_PIN_SET) {
-	  	              delay = 1000; // 1 second
-	  	          } else if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_3) == GPIO_PIN_SET) {
-	  	              current_pattern = 0; // Reset pattern
-	  	          }
+    
 
+    
   }
   /* USER CODE END 3 */
+
 }
 
 /**
@@ -354,35 +338,17 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+// TODO: Change LED pattern
+
 
 // Timer rolled over
 void TIM16_IRQHandler(void)
 {
-	// Acknowledge interrupt
-	HAL_TIM_IRQHandler(&htim16);
+    // Acknowledge interrupt
+    HAL_TIM_IRQHandler(&htim16);
 
-	// TODO: Change LED pattern
-	if (__HAL_TIM_GET_FLAG(&htim16, TIM_FLAG_UPDATE) != RESET) {
-		        if (__HAL_TIM_GET_IT_SOURCE(&htim16, TIM_IT_UPDATE) != RESET) {
-		            __HAL_TIM_CLEAR_IT(&htim16, TIM_IT_UPDATE);
-
-		            // Update LEDs based on current pattern
-
-		                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, led_patterns[current_pattern][0]);
-		                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, led_patterns[current_pattern][1]);
-		                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, led_patterns[current_pattern][2]);
-		                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, led_patterns[current_pattern][3]);
-		                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, led_patterns[current_pattern][4]);
-		                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, led_patterns[current_pattern][5]);
-		                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, led_patterns[current_pattern][6]);
-		                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, led_patterns[current_pattern][7]);
-
-		            current_pattern = (current_pattern + 1) % 9;
-
-		            __HAL_TIM_SET_AUTORELOAD(&htim16, delay);}
-	}
-	// print something
 }
+
 
 /* USER CODE END 4 */
 
