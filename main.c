@@ -108,7 +108,7 @@ int main(void)
 
   // TODO: Start timer TIM16
 
-
+HAL_TIM_Base_Start_IT(&htim16);
 
   /* USER CODE END 2 */
 
@@ -123,9 +123,9 @@ int main(void)
     /* USER CODE BEGIN 3 */
 
     // TODO: Check pushbuttons to change timer delay
-    
 
-    
+
+
   }
   /* USER CODE END 3 */
 
