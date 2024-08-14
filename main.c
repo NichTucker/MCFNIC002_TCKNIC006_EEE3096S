@@ -62,7 +62,6 @@ uint32_t delay = 1000;        // Default delay set to 1 second
 
 /* USER CODE END PV */
 
-
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
@@ -108,7 +107,7 @@ int main(void)
 
   // TODO: Start timer TIM16
 
-HAL_TIM_Base_Start_IT(&htim16);
+  HAL_TIM_Base_Start_IT(&htim16);
 
   /* USER CODE END 2 */
 
@@ -123,9 +122,23 @@ HAL_TIM_Base_Start_IT(&htim16);
     /* USER CODE BEGIN 3 */
 
     // TODO: Check pushbuttons to change timer delay
+    
+	  if (LL_GPIO_IsInputPinSet(Button0_GPIO_Port, Button0_Pin) == 0) {
+	      delay = 500;  // 0.5 seconds
+	  }
 
+	  if (LL_GPIO_IsInputPinSet(Button1_GPIO_Port, Button1_Pin) == 0) {
+	      delay = 2000; // 2 seconds
+	  }
 
+	  if (LL_GPIO_IsInputPinSet(Button2_GPIO_Port, Button2_Pin) == 0) {
+	      delay = 1000; // 1 second (default)
+	  }
 
+	  if (LL_GPIO_IsInputPinSet(Button3_GPIO_Port, Button3_Pin) == 0) {
+	      current_pattern = 0; // Reset to the first pattern
+	  }
+    
   }
   /* USER CODE END 3 */
 
@@ -347,6 +360,20 @@ void TIM16_IRQHandler(void)
     // Acknowledge interrupt
     HAL_TIM_IRQHandler(&htim16);
 
+    // Update the LED pattern
+    for (int i = 0; i < 8; i++) {
+        if (led_patterns[current_pattern] & (1 << i)) {
+            LL_GPIO_SetOutputPin(GPIOB, (1 << i)); // Set pin high if bit is 1
+        } else {
+            LL_GPIO_ResetOutputPin(GPIOB, (1 << i)); // Set pin low if bit is 0
+        }
+    }
+
+    // Move to the next pattern, wrap around if necessary
+    current_pattern = (current_pattern + 1) % 9;
+
+    // Update the timer auto-reload value to change delay
+    __HAL_TIM_SET_AUTORELOAD(&htim16, (delay - 1));  // Adjust this value based on the new timer configuration
 }
 
 
